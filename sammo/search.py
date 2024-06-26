@@ -115,8 +115,14 @@ class Optimizer:
 
     def save_json(self, fname: str | Path, **extra_info):
         def default(obj):
+            import numpy as np
             if hasattr(obj, "to_json"):
                 return obj.to_json()
+            elif type(obj).__module__ == np.__name__:
+                if isinstance(obj, np.ndarray):
+                    return obj.tolist()
+                else:
+                    return obj.item()
             raise TypeError
 
         fpath = Path(fname)
