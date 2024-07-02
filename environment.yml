@@ -4,6 +4,7 @@ channels:
 dependencies:
   - python=3.11
   - pandas
+  - numpy
   - pip
   - pip:
     - sammo==0.2.1

@@ -68,6 +68,8 @@ class DataFormatter(Component):
     :param orient: If "item_id", output format is a series of item records, each with an id and a value. If "kind",
         all inputs or output labels are grouped together.
     :param all_labels: A list of all possible labels, used by some formatters to determine the extractor.
+    :param attributes_processor: A function that processes the attributes before formatting. This is escentially a
+        map function.
     """
 
     DEFAULT_NAMES = {"input": "input", "gold_label": "output", "predicted_label": "predicted_output"}
