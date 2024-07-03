@@ -68,11 +68,9 @@ class DataFormatter(Component):
     :param orient: If "item_id", output format is a series of item records, each with an id and a value. If "kind",
         all inputs or output labels are grouped together.
     :param all_labels: A list of all possible labels, used by some formatters to determine the extractor.
-    :param attributes_processor: A function that processes the attributes before formatting. This is escentially a
-        map function.
     """
 
-    DEFAULT_NAMES = {"input": "input", "gold_label": "output", "predicted_label": "predicted_output"}
+    DEFAULT_NAMES = {"input": "input", "gold_label": "$..output", "predicted_label": "predicted_output"}
 
     def __init__(
         self,
@@ -187,7 +185,7 @@ class JSONDataFormatter(DataFormatter):
     def get_extractor(self, child, on_error="raise"):
         return JSONPath(
             ParseJSON(child, parse_fragments="all", on_error=on_error),
-            f"$..{self._names['gold_label'] if self._orient == 'id' else 'value'}",
+            f"{self._names['gold_label'] if self._orient == 'id' else '$..value'}",
             flatten_lists=False,
         )
 
@@ -290,6 +288,6 @@ class XMLDataFormatter(DataFormatter):
     def get_extractor(self, child, on_error="raise"):
         return JSONPath(
             ParseXML(child, parse_fragments="all", on_error=on_error),
-            f'$..{self._names["gold_label"]}',
+            f'{self._names["gold_label"]}',
             flatten_lists=True,
         )

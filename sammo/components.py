@@ -43,6 +43,7 @@ class GenerateText(Component):
     :param seed: The local seed to use for caching. Needs to be changed if sampling from LLM multiple times.
     :param randomness: The how deterministic the LLM output should be (typically corresponds to temperature).
     :param max_tokens: The maximum number of tokens to generate, defaulting to max length supported by `Runner`.
+    :param json_mode: Whether to expect the output to be in JSON format. Messages must contain the word "json" to be parsed.
     :param on_error: What to do in case the text cannot be generated.
     :param runner: If supplied, the given runner will be used for this generation rather than the Runner passed to _call
     """
