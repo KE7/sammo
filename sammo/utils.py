@@ -225,7 +225,11 @@ def get_default_save_path() -> str:
     if is_interactive():
         return get_main_script_path() / get_main_script_name()
     else:
-        return pathlib.Path(sys.argv[0]).with_suffix("").resolve()
+        script_path = sys.argv[0]
+        # If sys.argv[0] is empty or '.', set it to the current working directory
+        if not script_path or script_path == '.':
+            script_path = pathlib.Path.cwd()
+        return pathlib.Path(script_path
 
 
 def serialize_json(key) -> bytes:
