@@ -292,14 +292,33 @@ class OpenAIChat(OpenAIBaseRunner):
         revised_prompt = self._post_process_prompt(prompt)
         messages += [{"role": "user", "content": revised_prompt}]
 
+
         request = dict(messages=messages, max_tokens=self._max_context_window or max_tokens, temperature=randomness)
+
+        if self.MATCH_LU_TOOLBOX:
+            prompt = "\n".join([m["content"] for m in messages])
+            del request["messages"]
+            request["prompt"] = prompt
+
         if json_mode:
-            request["response_format"] = {"type": "json_object"}
+            if not self.MATCH_LU_TOOLBOX:
+                request["response_format"] = {"type": "json_object"}
+            else:
+                request["stop"] = ["\n"] # WARNING: just assume that the output json does not contain newlines
         fingerprint = serialize_json({"seed": seed, "generative_model_id": self._equivalence_class, **request})
 
         return await self._execute_request(request | {"model": self._model_id}, fingerprint, priority)
 
     def _to_llm_result(self, request: dict, json_data: dict, fingerprint: str | bytes) -> LLMResult:
+        if self.MATCH_LU_TOOLBOX:
+            request_text = request["prompt"]
+            prompt_logger.debug(f"\n\n\nAPI call:\n{request_text}\n->\n\n{json_data['choices'][0]['text']}")
+            return LLMResult(
+                json_data["choices"][0]["text"],
+                history=[{"content": request_text}] + json_data["choices"],
+                costs=self._extract_costs(json_data),
+                request_text=request_text,
+            )
         request_text = request["messages"][-1]["content"]
         prompt_logger.debug(f"\n\n\nAPI call:\n{request_text}\n->\n\n{json_data['choices'][0]['message']['content']}")
         return LLMResult(

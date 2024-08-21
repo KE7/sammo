@@ -229,7 +229,7 @@ def get_default_save_path() -> str:
         # If sys.argv[0] is empty or '.', set it to the current working directory
         if not script_path or script_path == '.':
             script_path = pathlib.Path.cwd()
-        return pathlib.Path(script_path
+        return pathlib.Path(script_path)
 
 
 def serialize_json(key) -> bytes:

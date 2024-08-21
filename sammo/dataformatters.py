@@ -68,9 +68,11 @@ class DataFormatter(Component):
     :param orient: If "item_id", output format is a series of item records, each with an id and a value. If "kind",
         all inputs or output labels are grouped together.
     :param all_labels: A list of all possible labels, used by some formatters to determine the extractor.
+    :param extractor_names A dictionary mapping columns to jsonpath-ng formatted selectors
     """
 
-    DEFAULT_NAMES = {"input": "input", "gold_label": "$..output", "predicted_label": "predicted_output"}
+    DEFAULT_NAMES = {"input": "input", "gold_label": "output", "predicted_label": "predicted_output"}
+    DEFAULT_EXTRACTOR_NAMES = {"gold_label": "$..output"}
 
     def __init__(
         self,
@@ -80,12 +82,16 @@ class DataFormatter(Component):
         orient: Literal["item", "kind"] = "item",
         all_labels=None,
         attributes_processor=None,
+        extractor_names: dict | None = None,
     ):
         super().__init__(None)
         self._format = format
         self._names = self.DEFAULT_NAMES
         if names is not None:
             self._names = {**self._names, **names}
+        self._extractor_names = self.DEFAULT_EXTRACTOR_NAMES
+        if extractor_names is not None:
+            self._extractor_names = {**self._extractor_names, **extractor_names}
         self._include_ids = include_ids
         self._flatten_1d_dicts = flatten_1d_dicts
         self._attributes_processor = attributes_processor
@@ -185,7 +191,7 @@ class JSONDataFormatter(DataFormatter):
     def get_extractor(self, child, on_error="raise"):
         return JSONPath(
             ParseJSON(child, parse_fragments="all", on_error=on_error),
-            f"{self._names['gold_label'] if self._orient == 'id' else '$..value'}",
+            f"{self._extractor_names['gold_label'] if self._orient == 'id' else '$..value'}",
             flatten_lists=False,
         )
 
@@ -288,6 +294,6 @@ class XMLDataFormatter(DataFormatter):
     def get_extractor(self, child, on_error="raise"):
         return JSONPath(
             ParseXML(child, parse_fragments="all", on_error=on_error),
-            f'{self._names["gold_label"]}',
+            f'{self._extractor_names["gold_label"]}',
             flatten_lists=True,
         )
