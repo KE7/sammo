@@ -303,8 +303,9 @@ class OpenAIChat(OpenAIBaseRunner):
         if json_mode:
             if not self.MATCH_LU_TOOLBOX:
                 request["response_format"] = {"type": "json_object"}
-            else:
-                request["stop"] = ["\n"] # WARNING: just assume that the output json does not contain newlines
+        else:
+            request["stop"] = ["\n"] # WARNING: just assume that the output json or function_call does not contain newlines
+            
         fingerprint = serialize_json({"seed": seed, "generative_model_id": self._equivalence_class, **request})
 
         return await self._execute_request(request | {"model": self._model_id}, fingerprint, priority)
