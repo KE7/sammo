@@ -158,7 +158,7 @@ class Optimizer:
         if hasattr(self, "_action_stats"):
             self._state["priors"] = copy.deepcopy(self._action_stats)
 
-    def show_report(self):
+    def show_report(self, maxcolwidths=50):
         if self._state is None or not self._state["fit"]:
             raise ValueError("Need to fit model first.")
 
@@ -169,8 +169,24 @@ class Optimizer:
                 row["validation_objective"] = x.get("validation", {"objective": ""})["objective"]
             table_data.append(row)
         print(f"\nFitting log ({len(table_data)} entries):")
-        print(tabulate(table_data, headers="keys", maxcolwidths=50))
+        print(tabulate(table_data, headers="keys", maxcolwidths=maxcolwidths))
         self._show_extra_report()
+
+    def get_report(self, maxcolwidths=50) -> str:
+        if self._state is None or not self._state["fit"]:
+            raise ValueError("Need to fit model first.")
+        
+        table_data = list()
+        for x in self._state["fit"]:
+            row = {k: x.get(k, "") for k in self.REPORT_COLUMNS} | x["details"]
+            if self._state["validation"]:
+                row["validation_objective"] = x.get("validation", {"objective": ""})["objective"]
+            table_data.append(row)
+
+        output = f"\nFitting log ({len(table_data)} entries):\n"
+        output += tabulate(table_data, headers="keys", maxcolwidths=maxcolwidths)
+        return output
+
 
     def _show_extra_report(self):
         pass
